@@ -1,0 +1,34 @@
+# 兼容的依赖包版本记录
+# 适用于 Python 3.12 + CUDA 12.8 环境
+# 记录时间: 2025年1月
+
+## 核心依赖包版本
+torch==2.7.0+cu128
+torchvision==0.22.0+cu128
+torchaudio==2.7.0+cu128
+xformers==0.0.30
+
+## 安装命令
+pip install torch==2.7.0+cu128 torchvision==0.22.0+cu128 torchaudio==2.7.0+cu128 --index-url https://download.pytorch.org/whl/cu128
+pip install xformers==0.0.30 --no-deps
+
+## 验证命令
+python -c "import torch; print('torch version:', torch.__version__); print('torch cuda available:', torch.cuda.is_available())"
+python -c "import torchvision; print('torchvision version:', torchvision.__version__)"
+python -c "import xformers; print('xformers version:', xformers.__version__); print('xformers available:', hasattr(xformers, '_has_cpp_library') and xformers._has_cpp_library)"
+
+## 环境信息
+- Python: 3.12.0
+- CUDA: 12.8
+- 平台: Windows 10 (win32)
+- 架构: win_amd64
+
+## 注意事项
+1. 这些版本组合已经验证可以正常工作
+2. xformers 0.0.30 与 torch 2.7.0+cu128 完全兼容
+3. 使用 --no-deps 安装 xformers 避免依赖冲突
+4. 配置文件中已启用 xformers (--xformers 参数)
+
+## 配置文件状态
+webui-user.bat 已修改为启用 xformers:
+set COMMANDLINE_ARGS=--ckpt-dir "G:\sd.webui-1.10.1-blackwell\sd.webui-1.10.1-blackwell\webui\models\Stable-diffusion" --attention-split --no-half-vae --disable-opt-split-attention --no-half --xformers
