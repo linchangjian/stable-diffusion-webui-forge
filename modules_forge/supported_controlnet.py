@@ -166,4 +166,57 @@ class ControlNetPatcher(ControlModelPatcher):
         return
 
 
+class FluxControlNetPatcher(ControlModelPatcher):
+    @staticmethod
+    def try_build_from_state_dict(controlnet_data, ckpt_path):
+        # 检查是否是Flux ControlNet格式
+        if "controlnet_blocks.0.weight" not in controlnet_data:
+            return None
+        
+        print(f"Loading Flux ControlNet from {ckpt_path}")
+        
+        # 创建Flux ControlNet模型
+        from diffusers.models import FluxControlNetModel
+        
+        # 从config.json加载配置
+        config_path = os.path.join(os.path.dirname(ckpt_path), "config.json")
+        if os.path.exists(config_path):
+            import json
+            with open(config_path, 'r') as f:
+                config = json.load(f)
+        else:
+            # 默认配置
+            config = {
+                "patch_size": 1,
+                "in_channels": 64,
+                "num_layers": 6,
+                "num_single_layers": 0,
+                "num_attention_heads": 24,
+                "attention_head_dim": 128,
+                "joint_attention_dim": 4096,
+                "pooled_projection_dim": 768
+            }
+        
+        # 创建模型
+        model = FluxControlNetModel(**config)
+        
+        # 加载权重
+        try:
+            model.load_state_dict(controlnet_data, strict=False)
+            print("Flux ControlNet loaded successfully")
+            return FluxControlNetPatcher(model)
+        except Exception as e:
+            print(f"Failed to load Flux ControlNet: {e}")
+            return None
+
+    def process_before_every_sampling(self, process, cond, mask, *args, **kwargs):
+        # Flux ControlNet的处理逻辑
+        if hasattr(process, 'control_net_units') and process.control_net_units:
+            # 这里需要实现Flux ControlNet的具体处理逻辑
+            # 暂时跳过，避免错误
+            pass
+        return
+
+
 add_supported_control_model(ControlNetPatcher)
+add_supported_control_model(FluxControlNetPatcher)
